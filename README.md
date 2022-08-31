@@ -10,4 +10,4 @@ The main goal of the project is to re-implement all vanilla commands into Basics
 Furthermore, all commands, features, and permissions should be completely configurable. Finally, it should be as light-weight as possible.
 
 ## License
-This project is licensed under the [MIT License](LICENSE)
+This project is licensed under the [MIT License](LICENSE.md)
