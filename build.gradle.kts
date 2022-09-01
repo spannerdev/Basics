@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.spanner"
-version = "0.0.1"
+version = "0.1.0"
 
 apply(plugin = "com.github.johnrengelman.shadow")
 
@@ -19,7 +19,6 @@ repositories {
 
 dependencies {
     compileOnly("com.github.Minestom:Minestom:c694c4074e")
-    compileOnly("net.kyori:adventure-text-minimessage:4.11.0")
     implementation("net.kyori:adventure-text-minimessage:4.11.0")
 }
 

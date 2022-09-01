@@ -18,7 +18,7 @@ cd Basics/
 ```
 Compile using Gradle:
 ```
-./gradlew build
+./gradlew shadowJar
 ```
 The compiled jar will be in the `/build/libs` directory.
 
