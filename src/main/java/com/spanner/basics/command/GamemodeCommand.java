@@ -1,5 +1,6 @@
 package com.spanner.basics.command;
 
+import com.spanner.basics.Basics;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -17,19 +18,19 @@ import java.util.Locale;
 
 public class GamemodeCommand extends Command {
 
-	public GamemodeCommand() {
+	Basics basics;
+	public GamemodeCommand(Basics basics) {
 		super("gamemode","gm");
+		this.basics = basics;
 
 		setDefaultExecutor((sender, context) -> {
-			sender.addPermission(new Permission("basics.gamemode"));
-			sender.addPermission(new Permission("basics.gamemode.creative"));
 			if (sender.hasPermission("basics.gamemode")) {
 				sender.sendMessage(MiniMessage.miniMessage().deserialize(
-				"<red>Usage: <gray>/gamemode <gamemode> [target]</gray></red>"
+					basics.getTranslator().translate("command.gamemode.usage",sender)
 				));
 			} else {
 				sender.sendMessage(MiniMessage.miniMessage().deserialize(
-				"<red>You do not have the permissions to use this command</red>"
+					basics.getTranslator().translate("command.permission",sender)
 				));
 			}
 		});
@@ -55,17 +56,17 @@ public class GamemodeCommand extends Command {
 					Player player = (Player) sender;
 					player.setGameMode(gamemode);
 					sender.sendMessage(MiniMessage.miniMessage().deserialize(
-							"<gold>Set your gamemode to <red><gamemode></red></gold>"
-							, Placeholder.unparsed("gamemode", gamemode.toString())
+						basics.getTranslator().translate("command.gamemode.self",sender)
+						, Placeholder.unparsed("gamemode", gamemode.toString())
 					));
 				} else {
 					sender.sendMessage(MiniMessage.miniMessage().deserialize(
-							"<red>You must be a player to use this command</red>"
+						basics.getTranslator().translate("command.constraint.player",sender)
 					));
 				}
 			} else {
 				sender.sendMessage(MiniMessage.miniMessage().deserialize(
-				"<red>You do not have the permissions to use this command</red>"
+					basics.getTranslator().translate("command.permission",sender)
 				));
 			}
 		},gamemodeArg);
@@ -91,23 +92,23 @@ public class GamemodeCommand extends Command {
 						Component targetDisplayName = target.getDisplayName();
 						if (targetDisplayName == null) targetDisplayName = Component.text(target.getUsername());
 						sender.sendMessage(MiniMessage.miniMessage().deserialize(
-								"<gold>Set the gamemode of <red><target></red> to <red><gamemode></red></gold>"
-								, Placeholder.component("target", targetDisplayName)
-								, Placeholder.unparsed("gamemode", gamemode.toString())
+							basics.getTranslator().translate("command.gamemode.other",sender)
+							, Placeholder.component("target", targetDisplayName)
+							, Placeholder.unparsed("gamemode", gamemode.toString())
 						));
 					} else {
 						sender.sendMessage(MiniMessage.miniMessage().deserialize(
-								"<red>Could not find player <target></red>"
-								, Placeholder.unparsed("target", context.getRaw("target"))));
+							basics.getTranslator().translate("command.common.notfound",sender)
+							, Placeholder.unparsed("target", context.getRaw("target"))));
 					}
 				} else {
 					sender.sendMessage(MiniMessage.miniMessage().deserialize(
-					"<red>You do not have the permissions to use this command</red>"
+							basics.getTranslator().translate("command.permission",sender)
 					));
 				}
 			} else {
 				sender.sendMessage(MiniMessage.miniMessage().deserialize(
-				"<red>You do not have the permissions to use this command</red>"
+						basics.getTranslator().translate("command.permission",sender)
 				));
 			}
 
