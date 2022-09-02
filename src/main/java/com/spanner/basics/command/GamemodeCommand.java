@@ -36,7 +36,7 @@ public class GamemodeCommand extends Command {
 		});
 
 		var gamemodeArg = ArgumentType.Enum("gamemode", GameMode.class);
-		var targetArg = ArgumentType.String("target");
+		var targetArg = ArgumentType.Entity("target");
 
 		addSyntax((sender, context) -> {
 			final GameMode gamemode = context.get(gamemodeArg);
@@ -74,7 +74,8 @@ public class GamemodeCommand extends Command {
 		addSyntax((sender,context)->{
 			if (sender.hasPermission("basics.gamemode.others")) {
 				final GameMode gamemode = context.get(gamemodeArg);
-				final Player target = MinecraftServer.getConnectionManager().getPlayer(context.get(targetArg));
+				final EntityFinder t = context.get(targetArg);
+				Player target = t.findFirstPlayer(sender);
 
 				boolean permitted = false;
 				if (gamemode == GameMode.CREATIVE) {
