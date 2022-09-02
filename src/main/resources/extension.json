@@ -1,5 +1,5 @@
 {
   "entrypoint": "com.spanner.basics.Basics",
   "name": "Basics",
-  "version": "0.3.4"
+  "version": "0.4.0"
 }

@@ -3,6 +3,7 @@ package com.spanner.basics.lang;
 import com.spanner.basics.Basics;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
+import org.apache.commons.lang3.LocaleUtils;
 
 import java.io.*;
 import java.util.*;
@@ -10,7 +11,11 @@ import java.util.*;
 public class Translator {
 
 	Map<Locale,Properties> languages = new HashMap<>();
-	Locale defaultLocale = Locale.UK;
+	static final Locale internalDefaultLocale = Locale.UK;
+
+	Locale defaultLocale = internalDefaultLocale;
+
+	boolean enabled;
 
 	Basics main;
 	public Translator(Basics main) {
@@ -31,6 +36,10 @@ public class Translator {
 		return translate(string,locale);
 	}
 	public String translate(String string, Locale locale) {
+		if (!enabled) {
+			String l = (String)languages.get(defaultLocale).get(string);
+			return l.substring(1,l.length()-1);
+		}
 		Properties language = languages.get(locale);
 		Object s = language.get(string);
 		String l = String.valueOf(s);
@@ -55,6 +64,20 @@ public class Translator {
 			e.printStackTrace();
 		}
 		return false;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+	public void setDefaultLocale(String localeString) {
+		Locale l = LocaleUtils.toLocale(localeString);
+		if (l==null) {
+			l = internalDefaultLocale;
+		}
+		setDefaultLocale(l);
+	}
+	public void setDefaultLocale(Locale locale) {
+		this.defaultLocale = locale;
 	}
 
 }

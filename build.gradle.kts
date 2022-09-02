@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.spanner"
-version = "0.3.4"
+version = "0.4.0"
 
 apply(plugin = "com.github.johnrengelman.shadow")
 
@@ -20,6 +20,8 @@ repositories {
 dependencies {
     compileOnly("com.github.Minestom:Minestom:c694c4074e")
     implementation("net.kyori:adventure-text-minimessage:4.11.0")
+    implementation("com.jayway.jsonpath:json-path:2.7.0")
+    implementation("org.apache.commons:commons-lang3:3.12.0")
 }
 
 tasks.withType<ShadowJar> {

@@ -1,0 +1,14 @@
+{
+  "command": {
+    "gamemode": {
+      "enabled": true
+    },
+    "give": {
+      "enabled": true
+    }
+  },
+  "translation": {
+    "default_locale": "en_GB",
+    "enabled": true
+  }
+}
