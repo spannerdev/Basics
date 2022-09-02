@@ -4,9 +4,7 @@ import com.spanner.basics.Basics;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 
 public class Translator {
@@ -45,7 +43,8 @@ public class Translator {
 	public boolean loadLanguage(Locale locale) {
 		try (InputStream stream = main.getPackagedResource("lang/"+locale.toString()+".lang")) {
 			Properties p = new Properties();
-			p.load(stream);
+			Reader reader = new InputStreamReader(stream,"UTF-8");
+			p.load(reader);
 			languages.put(locale,p);
 			stream.close();
 			return true;
