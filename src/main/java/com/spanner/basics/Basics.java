@@ -1,6 +1,7 @@
 package com.spanner.basics;
 
 import com.spanner.basics.command.GamemodeCommand;
+import com.spanner.basics.command.GiveCommand;
 import com.spanner.basics.lang.Translator;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
@@ -24,13 +25,14 @@ public class Basics extends Extension {
 			translator.loadLanguage(locale);
 		}
 
-		logger.info("Hello from Basics v0.2.1");
+		logger.info("Hello from Basics v0.3.0");
 	}
 
 	public void loadCommands() {
 		CommandManager commandManager =	MinecraftServer.getCommandManager();
 
 		commandManager.register(new GamemodeCommand(this));
+		commandManager.register(new GiveCommand(this));
 	}
 
 	@Override
