@@ -24,7 +24,7 @@ public class Basics extends Extension {
 			translator.loadLanguage(locale);
 		}
 
-		logger.info("Hello from Basics v0.2.0");
+		logger.info("Hello from Basics v0.2.1");
 	}
 
 	public void loadCommands() {

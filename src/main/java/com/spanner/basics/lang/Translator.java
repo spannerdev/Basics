@@ -34,19 +34,20 @@ public class Translator {
 	}
 	public String translate(String string, Locale locale) {
 		Properties language = languages.get(locale);
-		String l = String.valueOf(language.get(string));
-		if (l == null) {
+		Object s = language.get(string);
+		String l = String.valueOf(s);
+		if (s == null) {
 			l = (String)languages.get(defaultLocale).get(string);
 		}
 		return l.substring(1,l.length()-1);
 	}
 
 	public boolean loadLanguage(Locale locale) {
-		try (InputStream stream = main.getResource("lang/"+locale.toString()+".lang")) {
+		try (InputStream stream = main.getPackagedResource("lang/"+locale.toString()+".lang")) {
 			Properties p = new Properties();
 			p.load(stream);
 			languages.put(locale,p);
-
+			stream.close();
 			return true;
 		} catch (FileNotFoundException e) {
 			main.getLogger().warn("Lang file not found: "+locale.toString()+".lang");
