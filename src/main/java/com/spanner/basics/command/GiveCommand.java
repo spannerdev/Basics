@@ -42,7 +42,7 @@ public class GiveCommand extends Command {
 					sender.sendMessage(MiniMessage.miniMessage().deserialize(
 						basics.getTranslator().translate("command.give.self", sender)
 						, Placeholder.unparsed("quantity", "1")
-						, Placeholder.component("item", b.getDisplayName())
+						, Placeholder.unparsed("item", b.material().toString())
 					));
 				} else {
 					sender.sendMessage(MiniMessage.miniMessage().deserialize(
