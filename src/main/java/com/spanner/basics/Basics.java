@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import java.util.Locale;
 
 public class Basics extends Extension {
-	final static String VERSION = "0.4.0";
+	final static String VERSION = "0.4.1";
 
 	Logger logger;
 	Translator translator;

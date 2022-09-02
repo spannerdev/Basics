@@ -55,12 +55,13 @@ public class Translator {
 			Reader reader = new InputStreamReader(stream,"UTF-8");
 			p.load(reader);
 			languages.put(locale,p);
+			reader.close();
 			stream.close();
 			return true;
 		} catch (FileNotFoundException e) {
 			main.getLogger().warn("Lang file not found: "+locale.toString()+".lang");
 		} catch (IOException e) {
-			main.getLogger().error("Error loading lang file");
+			main.getLogger().error("IOException while loading language");
 			e.printStackTrace();
 		}
 		return false;
