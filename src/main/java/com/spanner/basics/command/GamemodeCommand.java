@@ -100,7 +100,7 @@ public class GamemodeCommand extends Command {
 						));
 					} else {
 						sender.sendMessage(MiniMessage.miniMessage().deserialize(
-							basics.getTranslator().translate("command.common.notfound",sender)
+							basics.getTranslator().translate("command.fail.notfound.player",sender)
 							, Placeholder.unparsed("target", context.getRaw("target"))));
 					}
 				} else {
@@ -148,7 +148,7 @@ public class GamemodeCommand extends Command {
 
 	private void sendNoPermission(CommandSender sender) {
 		sender.sendMessage(MiniMessage.miniMessage().deserialize(
-			basics.getTranslator().translate("command.permission",sender)
+			basics.getTranslator().translate("command.fail.permission",sender)
 		));
 	}
 	private void sendUsage(CommandSender sender) {

@@ -1,11 +1,11 @@
 language.authors = "Spanner"
 language.locale = "fr_FR"
 language.name = "French"
-command.permission="<red>Vous n'avez pas l'autorisation d'utiliser cette commande</red>"
-command.constraint.player="<red>Vous devez être un joueur pour utiliser cette commande</red>"
-command.constraint.console="<red>Cette commande ne peut être utilisé que dans la console</red>"
-command.common.notfound="<red>Impossible de trouver le joueur «<target>»</red>"
-command.common.itemstack="<red>Item invalide ou inconnu «<item>»</red>
+command.fail.permission="<red>Vous n'avez pas l'autorisation d'utiliser cette commande</red>"
+command.fail.constraint.player="<red>Vous devez être un joueur pour utiliser cette commande</red>"
+command.fail.constraint.console="<red>Cette commande ne peut être utilisé que dans la console</red>"
+command.fail.notfound.player="<red>Impossible de trouver le joueur «<target>»</red>"
+command.fail.notfound.item="<red>Item invalide ou inconnu «<item>»</red>
 command.gamemode.self="<gold>Votre gamemode a été mis à jour en <red><gamemode></red></gold>"
 command.gamemode.other="<gold>Le gamemode de <red><target></red> a été mis à jour en <red><gamemode></red></gold>"
 command.gamemode.usage="<red>Utilisation: <gray>/gamemode <gamemode> [target]</gray></red>"

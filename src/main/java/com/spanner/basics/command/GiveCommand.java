@@ -25,7 +25,7 @@ public class GiveCommand extends Command {
 				));
 			} else {
 				sender.sendMessage(MiniMessage.miniMessage().deserialize(
-						basics.getTranslator().translate("command.permission",sender)
+						basics.getTranslator().translate("command.fail.permission",sender)
 				));
 			}
 		});
@@ -46,12 +46,12 @@ public class GiveCommand extends Command {
 					));
 				} else {
 					sender.sendMessage(MiniMessage.miniMessage().deserialize(
-						basics.getTranslator().translate("command.permission",sender)
+						basics.getTranslator().translate("command.fail.permission",sender)
 					));
 				}
 			} else {
 				sender.sendMessage(MiniMessage.miniMessage().deserialize(
-					basics.getTranslator().translate("command.constraint.player",sender)
+					basics.getTranslator().translate("command.fail.constraint.player",sender)
 				));
 			}
 		},itemStackArg);
@@ -69,12 +69,12 @@ public class GiveCommand extends Command {
 					));
 				} else {
 					sender.sendMessage(MiniMessage.miniMessage().deserialize(
-						basics.getTranslator().translate("command.permission",sender)
+						basics.getTranslator().translate("command.fail.permission",sender)
 					));
 				}
 			} else {
 				sender.sendMessage(MiniMessage.miniMessage().deserialize(
-					basics.getTranslator().translate("command.constraint.player",sender)
+					basics.getTranslator().translate("command.fail.constraint.player",sender)
 				));
 			}
 		},itemStackArg,quantityArg);
@@ -97,12 +97,12 @@ public class GiveCommand extends Command {
 					));
 				} else {
 					sender.sendMessage(MiniMessage.miniMessage().deserialize(
-						basics.getTranslator().translate("command.permission",sender)
+						basics.getTranslator().translate("command.fail.permission",sender)
 					));
 				}
 			} else {
 				sender.sendMessage(MiniMessage.miniMessage().deserialize(
-					basics.getTranslator().translate("command.common.notfound",sender)
+					basics.getTranslator().translate("command.fail.notfound.player",sender)
 					, Placeholder.unparsed("target", context.getRaw("target"))));
 			}
 		},itemStackArg,quantityArg,targetArg);

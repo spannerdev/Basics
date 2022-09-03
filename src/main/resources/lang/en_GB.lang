@@ -1,11 +1,11 @@
 language.authors = "Spanner"
 language.locale = "en_GB"
 language.name = "English"
-command.permission="<red>You do not have permission to use this command</red>"
-command.constraint.player="<red>You must be a player to use this command</red>"
-command.constraint.console="<red>This command can only be used in the console</red>"
-command.common.notfound="<red>Could not find player \"<target>\"</red>"
-command.common.itemstack="<red>Invalid or unknown item \"<item>\"</red>
+command.fail.permission="<red>You do not have permission to use this command</red>"
+command.fail.constraint.player="<red>You must be a player to use this command</red>"
+command.fail.constraint.console="<red>This command can only be used in the console</red>"
+command.fail.notfound.player="<red>Could not find player \"<target>\"</red>"
+command.fail.notfound.item="<red>Invalid or unknown item \"<item>\"</red>
 command.gamemode.self="<gold>Set your gamemode to <red><gamemode></red></gold>"
 command.gamemode.other="<gold>Set the gamemode of <red><target></red> to <red><gamemode></red></gold>"
 command.gamemode.usage="<red>Usage: <gray>/gamemode <gamemode> [target]</gray></red>"
