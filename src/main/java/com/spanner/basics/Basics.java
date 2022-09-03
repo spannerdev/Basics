@@ -2,6 +2,7 @@ package com.spanner.basics;
 
 import com.spanner.basics.command.GamemodeCommand;
 import com.spanner.basics.command.GiveCommand;
+import com.spanner.basics.command.TeleportCommand;
 import com.spanner.basics.config.Config;
 import com.spanner.basics.config.ConfigLoader;
 import com.spanner.basics.lang.Translator;
@@ -20,7 +21,7 @@ import org.slf4j.Logger;
 import java.util.Locale;
 
 public class Basics extends Extension {
-	final static String VERSION = "0.6.1";
+	final static String VERSION = "0.7.0";
 
 	Logger logger;
 	Translator translator;
@@ -74,6 +75,7 @@ public class Basics extends Extension {
 	public void loadCommands() {
 		CommandManager commandManager =	MinecraftServer.getCommandManager();
 
+		if (config.get("command.teleport.enabled")) commandManager.register(new TeleportCommand(this));
 		if (config.get("command.gamemode.enabled")) commandManager.register(new GamemodeCommand(this));
 		if (config.get("command.give.enabled"))	commandManager.register(new GiveCommand(this));
 	}

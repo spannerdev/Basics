@@ -1,5 +1,8 @@
 {
   "command": {
+    "teleport": {
+      "enabled": true
+    },
     "gamemode": {
       "enabled": true
     },
@@ -23,7 +26,10 @@
           "basics.gamemode.adventure",
           "basics.give",
           "basics.give.self",
-          "basics.give.other"
+          "basics.give.other",
+          "basics.teleport",
+          "basics.teleport.self",
+          "basics.teleport.other"
         ],
         "inherit": ["default"]
       },
