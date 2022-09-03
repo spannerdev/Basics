@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import java.util.Locale;
 
 public class Basics extends Extension {
-	final static String VERSION = "0.5.0";
+	final static String VERSION = "0.6.0";
 
 	Logger logger;
 	Translator translator;
@@ -29,6 +29,22 @@ public class Basics extends Extension {
 	Locale[] supportedLangs = { Locale.UK, Locale.FRANCE };
 
 	EventNode permissionHandlerEventNode;
+
+	private void givePlayerGroupPerms(Player p, String group) {
+		JSONArray perms = config.get("permission.group."+group+".permissions");
+		JSONArray inherit = config.get("permission.group."+group+".inherit");
+		if (perms == null || inherit == null) {
+			logger.warn("Permissions group "+group+" has invalid configuration");
+			return;
+		}
+
+		for (int i = 0; i < perms.size(); i++) {
+			p.addPermission(new Permission((String) perms.get(i)));
+		}
+		for (int i = 0; i < inherit.size(); i++) {
+			givePlayerGroupPerms(p, (String) inherit.get(i));
+		}
+	}
 
 	public void loadConfig() {
 		Config config = ConfigLoader.load(this);
@@ -45,15 +61,8 @@ public class Basics extends Extension {
 				String group = config.get("permission.user."+uuid+".group");
 				Integer permissionLevel = (Integer)config.get("permission.user."+uuid+".permission_level");
 				if (permissionLevel != null) p.setPermissionLevel(permissionLevel);
-				if (group == null) {
-					group = "default";
-				}
-				JSONArray perms = config.get("permission.group."+group);
-				if (perms == null) return;
-
-				for (int i=0;i<perms.size();i++) {
-					p.addPermission(new Permission((String)perms.get(i)));
-				}
+				if (group == null) group = "default";
+				givePlayerGroupPerms(p,group);
 			});
 		} else {
 			if (permissionHandlerEventNode != null) {
