@@ -20,7 +20,6 @@ public class Config {
 		try {
 			return JsonPath.read(this.configDocument, "$." + path);
 		} catch (PathNotFoundException e) {
-			basics.getLogger().error("PathNotFoundException while getting from config: "+path);
 			return null;
 		}
 	}

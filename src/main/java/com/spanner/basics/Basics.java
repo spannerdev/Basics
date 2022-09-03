@@ -7,13 +7,20 @@ import com.spanner.basics.config.ConfigLoader;
 import com.spanner.basics.lang.Translator;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
+import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.GlobalEventHandler;
+import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.extensions.Extension;
+import net.minestom.server.permission.Permission;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.slf4j.Logger;
 
 import java.util.Locale;
 
 public class Basics extends Extension {
-	final static String VERSION = "0.4.1";
+	final static String VERSION = "0.5.0";
 
 	Logger logger;
 	Translator translator;
@@ -21,12 +28,38 @@ public class Basics extends Extension {
 
 	Locale[] supportedLangs = { Locale.UK, Locale.FRANCE };
 
+	EventNode permissionHandlerEventNode;
+
 	public void loadConfig() {
 		Config config = ConfigLoader.load(this);
 		this.config = config;
 
-		translator.setEnabled(config.get("translation.enabled"));
-		translator.setDefaultLocale((String) config.get("translation.default_locale"));
+		translator.setEnabled(config.get("translate.enabled"));
+		translator.setDefaultLocale((String) config.get("translate.default_locale"));
+
+		GlobalEventHandler globalEventHandler = MinecraftServer.getGlobalEventHandler();
+		if (config.get("permission.enabled")) {
+			this.permissionHandlerEventNode = globalEventHandler.addListener(PlayerLoginEvent.class, event -> {
+				Player p = event.getPlayer();
+				String uuid = p.getUuid().toString();
+				String group = config.get("permission.user."+uuid+".group");
+				Integer permissionLevel = (Integer)config.get("permission.user."+uuid+".permission_level");
+				if (permissionLevel != null) p.setPermissionLevel(permissionLevel);
+				if (group == null) {
+					group = "default";
+				}
+				JSONArray perms = config.get("permission.group."+group);
+				if (perms == null) return;
+
+				for (int i=0;i<perms.size();i++) {
+					p.addPermission(new Permission((String)perms.get(i)));
+				}
+			});
+		} else {
+			if (permissionHandlerEventNode != null) {
+				globalEventHandler.removeChild(permissionHandlerEventNode);
+			}
+		}
 	}
 
 	public void loadCommands() {

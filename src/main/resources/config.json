@@ -7,8 +7,30 @@
       "enabled": true
     }
   },
-  "translation": {
+  "translate": {
     "default_locale": "en_GB",
     "enabled": true
+  },
+  "permission": {
+    "enabled": true,
+    "group": {
+      "admin": [
+        "basics.gamemode",
+        "basics.gamemode.creative",
+        "basics.gamemode.survival",
+        "basics.gamemode.spectator",
+        "basics.gamemode.adventure",
+        "basics.give",
+        "basics.give.self",
+        "basics.give.other"
+      ],
+      "default": []
+    },
+    "user": {
+      "a1094058-89ab-496e-928c-cb660577e1bd": {
+        "group": "admin",
+        "permission_level": 4
+      }
+    }
   }
 }
