@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.spanner"
-version = "0.6.0"
+version = "0.6.1"
 
 apply(plugin = "com.github.johnrengelman.shadow")
 

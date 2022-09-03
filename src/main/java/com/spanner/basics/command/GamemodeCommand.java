@@ -5,7 +5,10 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
+import net.minestom.server.command.builder.CommandContext;
+import net.minestom.server.command.builder.CommandExecutor;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.condition.Conditions;
 import net.minestom.server.entity.Entity;
@@ -39,95 +42,53 @@ public class GamemodeCommand extends Command {
 					for (String alias : aliasMap.keySet()) {
 						if (cmd.equals(alias)) {
 							GameMode gamemode = aliasMap.get(cmd);
-							boolean permitted = false;
-							if (gamemode == GameMode.CREATIVE) {
-								permitted = sender.hasPermission("basics.gamemode.creative");
-							} else if (gamemode == GameMode.SURVIVAL) {
-								permitted = sender.hasPermission("basics.gamemode.survival");
-							} else if (gamemode == GameMode.SPECTATOR) {
-								permitted = sender.hasPermission("basics.gamemode.spectator");
-							} else if (gamemode == GameMode.ADVENTURE) {
-								permitted = sender.hasPermission("basics.gamemode.adventure");
-							}
-							if (permitted) {
+							if (senderHasPermissions(sender,gamemode)) {
 								Player player = (Player) sender;
 								player.setGameMode(gamemode);
 								sender.sendMessage(MiniMessage.miniMessage().deserialize(
 									basics.getTranslator().translate("command.gamemode.self",sender)
-									, Placeholder.unparsed("gamemode", gamemode.toString())
+									,Placeholder.unparsed("gamemode", gamemode.toString())
 								));
-								return;
 							} else {
-								sender.sendMessage(MiniMessage.miniMessage().deserialize(
-									basics.getTranslator().translate("command.permission",sender)
-								));
+								sendNoPermission(sender);
 							}
 						}
 					}
+				} else {
+					sendUsage(sender);
 				}
-				sender.sendMessage(MiniMessage.miniMessage().deserialize(
-					basics.getTranslator().translate("command.gamemode.usage",sender)
-				));
 			} else {
-				sender.sendMessage(MiniMessage.miniMessage().deserialize(
-					basics.getTranslator().translate("command.permission",sender)
-				));
+				sendNoPermission(sender);
 			}
 		});
 
-		var gamemodeArg = ArgumentType.Enum("gamemode", GameMode.class);
 		var targetArg = ArgumentType.Entity("target");
+		var gamemodeStringArg = ArgumentType.Word("gamemode").from("creative","survival","adventure","spectator");
 
-		addSyntax((sender, context) -> {
-			final GameMode gamemode = context.get(gamemodeArg);
-
-			boolean permitted = false;
-			if (gamemode == GameMode.CREATIVE) {
-				permitted = sender.hasPermission("basics.gamemode.creative");
-			} else if (gamemode == GameMode.SURVIVAL) {
-				permitted = sender.hasPermission("basics.gamemode.survival");
-			} else if (gamemode == GameMode.SPECTATOR) {
-				permitted = sender.hasPermission("basics.gamemode.spectator");
-			} else if (gamemode == GameMode.ADVENTURE) {
-				permitted = sender.hasPermission("basics.gamemode.adventure");
+		addSyntax((sender,context) -> {
+			GameMode gamemode = null;
+			try {
+				gamemode = GameMode.valueOf(context.get(gamemodeStringArg).toUpperCase());
+			} catch (IllegalArgumentException e) {
+				sendUsage(sender);
+				return;
 			}
-			if (permitted) {
-				if (sender instanceof Player) {
-					Player player = (Player) sender;
-					player.setGameMode(gamemode);
-					sender.sendMessage(MiniMessage.miniMessage().deserialize(
-						basics.getTranslator().translate("command.gamemode.self",sender)
-						, Placeholder.unparsed("gamemode", gamemode.toString())
-					));
-				} else {
-					sender.sendMessage(MiniMessage.miniMessage().deserialize(
-						basics.getTranslator().translate("command.constraint.player",sender)
-					));
-				}
-			} else {
-				sender.sendMessage(MiniMessage.miniMessage().deserialize(
-					basics.getTranslator().translate("command.permission",sender)
-				));
-			}
-		},gamemodeArg);
+			gamemodeSelfCommand(sender,gamemode);
+		},gamemodeStringArg);
 
 		addSyntax((sender,context)->{
 			if (sender.hasPermission("basics.gamemode.others")) {
-				final GameMode gamemode = context.get(gamemodeArg);
-				final EntityFinder t = context.get(targetArg);
+				GameMode gamemode = null;
+				try {
+					gamemode = GameMode.valueOf(context.get(gamemodeStringArg).toUpperCase());
+				} catch (IllegalArgumentException e) {
+					sendUsage(sender);
+					return;
+				}
+				EntityFinder t = context.get(targetArg);
 				Player target = t.findFirstPlayer(sender);
 
-				boolean permitted = false;
-				if (gamemode == GameMode.CREATIVE) {
-					permitted = sender.hasPermission("basics.gamemode.creative");
-				} else if (gamemode == GameMode.SURVIVAL) {
-					permitted = sender.hasPermission("basics.gamemode.survival");
-				} else if (gamemode == GameMode.SPECTATOR) {
-					permitted = sender.hasPermission("basics.gamemode.spectator");
-				} else if (gamemode == GameMode.ADVENTURE) {
-					permitted = sender.hasPermission("basics.gamemode.adventure");
-				}
-				if (permitted) {
+				if (senderHasPermissions(sender,gamemode)) {
 					if (target != null) {
 						target.setGameMode(gamemode);
 						Component targetDisplayName = target.getDisplayName();
@@ -143,18 +104,57 @@ public class GamemodeCommand extends Command {
 							, Placeholder.unparsed("target", context.getRaw("target"))));
 					}
 				} else {
-					sender.sendMessage(MiniMessage.miniMessage().deserialize(
-							basics.getTranslator().translate("command.permission",sender)
-					));
+					sendNoPermission(sender);
 				}
 			} else {
-				sender.sendMessage(MiniMessage.miniMessage().deserialize(
-						basics.getTranslator().translate("command.permission",sender)
-				));
+				sendNoPermission(sender);
 			}
 
-		},gamemodeArg,targetArg);
+		},gamemodeStringArg,targetArg);
 
+	}
+
+	private void gamemodeSelfCommand(CommandSender sender, GameMode gamemode) {
+
+		if (senderHasPermissions(sender,gamemode)) {
+			if (sender instanceof Player) {
+				Player player = (Player) sender;
+				player.setGameMode(gamemode);
+				sender.sendMessage(MiniMessage.miniMessage().deserialize(
+						basics.getTranslator().translate("command.gamemode.self",sender)
+						, Placeholder.unparsed("gamemode", gamemode.toString())
+				));
+			} else {
+				sendNoPermission(sender);
+			}
+		} else {
+			sendNoPermission(sender);
+		}
+	}
+
+	private boolean senderHasPermissions(CommandSender sender, GameMode gamemode) {
+		boolean permitted = false;
+		if (gamemode == GameMode.CREATIVE) {
+			permitted = sender.hasPermission("basics.gamemode.creative");
+		} else if (gamemode == GameMode.SURVIVAL) {
+			permitted = sender.hasPermission("basics.gamemode.survival");
+		} else if (gamemode == GameMode.SPECTATOR) {
+			permitted = sender.hasPermission("basics.gamemode.spectator");
+		} else if (gamemode == GameMode.ADVENTURE) {
+			permitted = sender.hasPermission("basics.gamemode.adventure");
+		}
+		return permitted;
+	}
+
+	private void sendNoPermission(CommandSender sender) {
+		sender.sendMessage(MiniMessage.miniMessage().deserialize(
+			basics.getTranslator().translate("command.permission",sender)
+		));
+	}
+	private void sendUsage(CommandSender sender) {
+		sender.sendMessage(MiniMessage.miniMessage().deserialize(
+			basics.getTranslator().translate("command.gamemode.usage", sender)
+		));
 	}
 
 }
