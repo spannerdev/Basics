@@ -1,13 +1,17 @@
 package com.spanner.basics.command;
 
 import com.spanner.basics.Basics;
+import com.spanner.basics.util.BasicsUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
+
+import java.util.List;
 
 public class TeleportCommand extends Command {
 
@@ -32,20 +36,27 @@ public class TeleportCommand extends Command {
 		addSyntax((sender,context) -> {
 			if (sender.hasPermission("basics.teleport.others")) {
 				if (sender instanceof Player) {
-					Player p = context.get(playerArg).findFirstPlayer(sender);
-					Player target = context.get(targetArg).findFirstPlayer(sender);
-					if (p != null) {
-						if (target != null) {
-							p.teleport(target.getPosition());
-							Component playerDisplayName = p.getDisplayName();
-							Component targetDisplayName = target.getDisplayName();
-							if (playerDisplayName == null) playerDisplayName = Component.text(p.getUsername());
-							if (targetDisplayName == null) targetDisplayName = Component.text(target.getUsername());
-							sender.sendMessage(MiniMessage.miniMessage().deserialize(
-								basics.getTranslator().translate("command.teleport.other", sender)
-								,Placeholder.component("player",playerDisplayName)
-								,Placeholder.component("target",targetDisplayName)
-							));
+					List<Entity> entities = context.get(playerArg).find(sender);
+					List<Entity> targets = context.get(targetArg).find(sender);
+					if (entities != null && entities.size() > 0) {
+						if (targets != null && targets.size() > 0) {
+							if (targets.size() == 1) {
+								Entity target = targets.get(0);
+								Component targetDisplayName = BasicsUtils.getName(target);
+								for (Entity e : entities) {
+									e.teleport(target.getPosition());
+									Component entityDisplayName = BasicsUtils.getName(e);
+									sender.sendMessage(MiniMessage.miniMessage().deserialize(
+											basics.getTranslator().translate("command.teleport.other", sender)
+											, Placeholder.component("player", entityDisplayName)
+											, Placeholder.component("target", targetDisplayName)
+									));
+								}
+							} else {
+								sender.sendMessage(MiniMessage.miniMessage().deserialize(
+									basics.getTranslator().translate("command.fail.constraint.limit",sender)
+								));
+							}
 						} else {
 							sendNotFound(sender, context.getRaw("target"));
 						}
@@ -66,15 +77,21 @@ public class TeleportCommand extends Command {
 			if (sender.hasPermission("basics.teleport.self")) {
 				if (sender instanceof Player) {
 					Player p = (Player)sender;
-					Player other = context.get(playerArg).findFirstPlayer(sender);
-					if (other != null) {
-						p.teleport(other.getPosition());
-						Component otherDisplayName = other.getDisplayName();
-						if (otherDisplayName == null) otherDisplayName = Component.text(other.getUsername());
-						sender.sendMessage(MiniMessage.miniMessage().deserialize(
-							basics.getTranslator().translate("command.teleport.self", sender)
-							,Placeholder.component("player",otherDisplayName)
-						));
+					List<Entity> otherEntities = context.get(playerArg).find(sender);
+					if (otherEntities != null && otherEntities.size() > 0) {
+						if (otherEntities.size() == 1) {
+							Entity other = otherEntities.get(0);
+							p.teleport(other.getPosition());
+							Component otherDisplayName = BasicsUtils.getName(other);
+							sender.sendMessage(MiniMessage.miniMessage().deserialize(
+								basics.getTranslator().translate("command.teleport.self", sender)
+								,Placeholder.component("player", otherDisplayName)
+							));
+						} else {
+							sender.sendMessage(MiniMessage.miniMessage().deserialize(
+								basics.getTranslator().translate("command.fail.constraint.limit",sender)
+							));
+						}
 					} else {
 						sendNotFound(sender,context.getRaw("player"));
 					}

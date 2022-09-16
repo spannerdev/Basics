@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import java.util.Locale;
 
 public class Basics extends Extension {
-	final static String VERSION = "0.7.0";
+	final static String VERSION = "0.8.0";
 
 	Logger logger;
 	Translator translator;
