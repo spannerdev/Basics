@@ -3,7 +3,6 @@ package com.spanner.basics.command;
 import com.spanner.basics.Basics;
 import com.spanner.basics.util.BasicsUtils;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
@@ -33,29 +32,24 @@ public class GamemodeCommand extends Command {
 		aliasMap.put("gmsp",GameMode.SPECTATOR);
 
 		setDefaultExecutor((sender, context) -> {
-			if (sender.hasPermission("basics.gamemode")) {
-				if (sender instanceof Player) {
-					String cmd = context.getCommandName().toLowerCase(Locale.ROOT);
-					for (String alias : aliasMap.keySet()) {
-						if (cmd.equals(alias)) {
-							GameMode gamemode = aliasMap.get(cmd);
-							if (senderHasPermissions(sender,gamemode)) {
-								Player player = (Player) sender;
-								player.setGameMode(gamemode);
-								sender.sendMessage(MiniMessage.miniMessage().deserialize(
-									basics.getTranslator().translate("command.gamemode.self",sender)
-									,Placeholder.unparsed("gamemode", gamemode.toString())
-								));
-							} else {
-								sendNoPermission(sender);
-							}
-						}
-					}
-				} else {
-					sendUsage(sender);
+			if (!sender.hasPermission("basics.gamemode")) { sendNoPermission(sender); return; }
+			if (!(sender instanceof Player)) {
+				BasicsUtils.sendTranslate(basics,sender,"command.fail.constraint.target.player");
+				return;
+			}
+
+			String cmd = context.getCommandName().toLowerCase(Locale.ROOT);
+			for (String alias : aliasMap.keySet()) {
+				if (cmd.equals(alias)) {
+					GameMode gamemode = aliasMap.get(cmd);
+					if (!senderHasPermissions(sender,gamemode)) { sendNoPermission(sender); return; }
+
+					Player player = (Player) sender;
+					player.setGameMode(gamemode);
+					BasicsUtils.sendTranslate(basics,sender,"command.gamemode.self",
+						Placeholder.unparsed("gamemode", gamemode.toString()));
+					break;
 				}
-			} else {
-				sendNoPermission(sender);
 			}
 		});
 
@@ -63,7 +57,7 @@ public class GamemodeCommand extends Command {
 		var gamemodeStringArg = ArgumentType.Word("gamemode").from("creative","survival","adventure","spectator");
 
 		addSyntax((sender,context) -> {
-			GameMode gamemode = null;
+			GameMode gamemode;
 			try {
 				gamemode = GameMode.valueOf(context.get(gamemodeStringArg).toUpperCase());
 			} catch (IllegalArgumentException e) {
@@ -74,69 +68,56 @@ public class GamemodeCommand extends Command {
 		},gamemodeStringArg);
 
 		addSyntax((sender,context)->{
-			if (sender.hasPermission("basics.gamemode.others")) {
-				GameMode gamemode = null;
-				try {
-					gamemode = GameMode.valueOf(context.get(gamemodeStringArg).toUpperCase());
-				} catch (IllegalArgumentException e) {
-					sendUsage(sender);
-					return;
-				}
-				EntityFinder t = context.get(targetArg);
-				List<Entity> targets = t.find(sender);
-				boolean valid = true;
-				for (Entity target : targets) { if (!(target instanceof Player)) valid = false; }
-				if (!valid) {
-					sender.sendMessage(MiniMessage.miniMessage().deserialize(
-						basics.getTranslator().translate("command.fail.constraint.target.player", sender)
-					));
-					return;
-				}
+			if (!sender.hasPermission("basics.gamemode.others")) { sendNoPermission(sender); return; }
 
-				if (senderHasPermissions(sender,gamemode)) {
-					if (targets != null && targets.size() > 0) {
-						for (Entity entity : targets) {
-							Player target = (Player)entity;
-							target.setGameMode(gamemode);
-							Component targetDisplayName = BasicsUtils.getName(entity);
-							sender.sendMessage(MiniMessage.miniMessage().deserialize(
-									basics.getTranslator().translate("command.gamemode.other", sender)
-									, Placeholder.component("target", targetDisplayName)
-									, Placeholder.unparsed("gamemode", gamemode.toString())
-							));
-						}
-					} else {
-						sender.sendMessage(MiniMessage.miniMessage().deserialize(
-							basics.getTranslator().translate("command.fail.notfound.player",sender)
-							, Placeholder.unparsed("target", context.getRaw("target"))));
-					}
-				} else {
-					sendNoPermission(sender);
+			GameMode gamemode;
+			try {
+				gamemode = GameMode.valueOf(context.get(gamemodeStringArg).toUpperCase());
+			} catch (IllegalArgumentException e) {
+				sendUsage(sender);
+				return;
+			}
+			EntityFinder t = context.get(targetArg);
+			List<Entity> targets = t.find(sender);
+			for (Entity target : targets) {
+				if (!(target instanceof Player)) {
+					BasicsUtils.sendTranslate(basics,sender,"command.fail.constraint.target.player");
+					return;
 				}
-			} else {
-				sendNoPermission(sender);
 			}
 
+			if (!senderHasPermissions(sender,gamemode)) { sendNoPermission(sender); return; }
+
+			if (targets.size() == 0) {
+				BasicsUtils.sendTranslate(basics,sender,"command.fail.notfound.player",
+					Placeholder.unparsed("target", context.getRaw("target")));
+				return;
+			}
+
+			for (Entity entity : targets) {
+				Player target = (Player)entity;
+				target.setGameMode(gamemode);
+				Component targetDisplayName = BasicsUtils.getName(entity);
+				BasicsUtils.sendTranslate(basics,sender,"command.gamemode.other",
+					Placeholder.component("target", targetDisplayName),
+					Placeholder.unparsed("gamemode", gamemode.toString())
+				);
+			}
 		},gamemodeStringArg,targetArg);
 
 	}
 
 	private void gamemodeSelfCommand(CommandSender sender, GameMode gamemode) {
-
-		if (senderHasPermissions(sender,gamemode)) {
-			if (sender instanceof Player) {
-				Player player = (Player) sender;
-				player.setGameMode(gamemode);
-				sender.sendMessage(MiniMessage.miniMessage().deserialize(
-						basics.getTranslator().translate("command.gamemode.self",sender)
-						, Placeholder.unparsed("gamemode", gamemode.toString())
-				));
-			} else {
-				sendNoPermission(sender);
-			}
-		} else {
-			sendNoPermission(sender);
+		if (!senderHasPermissions(sender,gamemode)) { sendNoPermission(sender); return; }
+		if (!(sender instanceof Player)) {
+			BasicsUtils.sendTranslate(basics,sender,"command.fail.constraint.target.player");
+			return;
 		}
+
+		Player player = (Player) sender;
+		player.setGameMode(gamemode);
+		BasicsUtils.sendTranslate(basics,sender,"command.gamemode.self",
+			Placeholder.unparsed("gamemode", gamemode.toString()));
 	}
 
 	private boolean senderHasPermissions(CommandSender sender, GameMode gamemode) {
@@ -154,14 +135,10 @@ public class GamemodeCommand extends Command {
 	}
 
 	private void sendNoPermission(CommandSender sender) {
-		sender.sendMessage(MiniMessage.miniMessage().deserialize(
-			basics.getTranslator().translate("command.fail.permission",sender)
-		));
+		BasicsUtils.sendTranslate(basics,sender,"command.fail.permission");
 	}
 	private void sendUsage(CommandSender sender) {
-		sender.sendMessage(MiniMessage.miniMessage().deserialize(
-			basics.getTranslator().translate("command.gamemode.usage", sender)
-		));
+		BasicsUtils.sendTranslate(basics,sender,"command.gamemode.usage");
 	}
 
 }

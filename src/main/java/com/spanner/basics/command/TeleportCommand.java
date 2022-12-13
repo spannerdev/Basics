@@ -22,102 +22,82 @@ public class TeleportCommand extends Command {
 
 		setDefaultExecutor((sender, context) -> {
 			if (sender.hasPermission("basics.teleport")) {
-				sender.sendMessage(MiniMessage.miniMessage().deserialize(
-					basics.getTranslator().translate("command.teleport.usage",sender)
-				));
+				BasicsUtils.sendTranslate(basics,sender,"command.teleport.usage");
 			} else {
 				sendNoPermission(sender);
 			}
 		});
 
-		var playerArg = ArgumentType.Entity("player");
+		var playerArg = ArgumentType.Entity("entity");
 		var targetArg = ArgumentType.Entity("target");
 
 		addSyntax((sender,context) -> {
-			if (sender.hasPermission("basics.teleport.others")) {
-				if (sender instanceof Player) {
-					List<Entity> entities = context.get(playerArg).find(sender);
-					List<Entity> targets = context.get(targetArg).find(sender);
-					if (entities != null && entities.size() > 0) {
-						if (targets != null && targets.size() > 0) {
-							if (targets.size() == 1) {
-								Entity target = targets.get(0);
-								Component targetDisplayName = BasicsUtils.getName(target);
-								for (Entity e : entities) {
-									e.teleport(target.getPosition());
-									Component entityDisplayName = BasicsUtils.getName(e);
-									sender.sendMessage(MiniMessage.miniMessage().deserialize(
-											basics.getTranslator().translate("command.teleport.other", sender)
-											, Placeholder.component("player", entityDisplayName)
-											, Placeholder.component("target", targetDisplayName)
-									));
-								}
-							} else {
-								sender.sendMessage(MiniMessage.miniMessage().deserialize(
-									basics.getTranslator().translate("command.fail.constraint.limit",sender)
-								));
-							}
-						} else {
-							sendNotFound(sender, context.getRaw("target"));
-						}
-					} else {
-						sendNotFound(sender,context.getRaw("player"));
-					}
-				} else {
-					sender.sendMessage(MiniMessage.miniMessage().deserialize(
-						basics.getTranslator().translate("command.fail.constraint.player",sender)
-					));
-				}
-			} else {
+			if (!sender.hasPermission("basics.teleport.others")) {
 				sendNoPermission(sender);
+				return;
+			}
+
+			List<Entity> entities = context.get(playerArg).find(sender);
+			List<Entity> targets = context.get(targetArg).find(sender);
+			if (entities.size() == 0) {
+				sendNotFound(sender,context.getRaw("entity"));
+				return;
+			}
+			if (targets.size() == 0) {
+				sendNotFound(sender,context.getRaw("target"));
+				return;
+			}
+			if (targets.size() != 1) {
+				BasicsUtils.sendTranslate(basics,sender,"command.fail.constraint.limit");
+				return;
+			}
+
+			Entity target = targets.get(0);
+			Component targetDisplayName = BasicsUtils.getName(target);
+			for (Entity e : entities) {
+				e.teleport(target.getPosition());
+				Component entityDisplayName = BasicsUtils.getName(e);
+				BasicsUtils.sendTranslate(basics,sender,"command.teleport.other",
+					Placeholder.component("entity", entityDisplayName),
+					Placeholder.component("target", targetDisplayName)
+				);
 			}
 		},playerArg,targetArg);
 
 		addSyntax((sender,context) -> {
-			if (sender.hasPermission("basics.teleport.self")) {
-				if (sender instanceof Player) {
-					Player p = (Player)sender;
-					List<Entity> otherEntities = context.get(playerArg).find(sender);
-					if (otherEntities != null && otherEntities.size() > 0) {
-						if (otherEntities.size() == 1) {
-							Entity other = otherEntities.get(0);
-							p.teleport(other.getPosition());
-							Component otherDisplayName = BasicsUtils.getName(other);
-							sender.sendMessage(MiniMessage.miniMessage().deserialize(
-								basics.getTranslator().translate("command.teleport.self", sender)
-								,Placeholder.component("player", otherDisplayName)
-							));
-						} else {
-							sender.sendMessage(MiniMessage.miniMessage().deserialize(
-								basics.getTranslator().translate("command.fail.constraint.limit",sender)
-							));
-						}
-					} else {
-						sendNotFound(sender,context.getRaw("player"));
-					}
-				} else {
-					sender.sendMessage(MiniMessage.miniMessage().deserialize(
-						basics.getTranslator().translate("command.fail.constraint.player",sender)
-					));
-				}
-			} else {
+			if (!sender.hasPermission("basics.teleport.self")) {
 				sendNoPermission(sender);
+				return;
 			}
+			if (!(sender instanceof Player p)) {
+				BasicsUtils.sendTranslate(basics,sender,"command.fail.constraint.player");
+				return;
+			}
+
+			List<Entity> otherEntities = context.get(playerArg).find(sender);
+			if (otherEntities.size() == 0) {
+				sendNotFound(sender,context.getRaw("entity"));
+				return;
+			}
+			if (otherEntities.size() != 1) {
+				BasicsUtils.sendTranslate(basics,sender,"command.fail.constraint.limit");
+			}
+			Entity other = otherEntities.get(0);
+			p.teleport(other.getPosition());
+			Component otherDisplayName = BasicsUtils.getName(other);
+			BasicsUtils.sendTranslate(basics,sender,"command.teleport.self",
+					Placeholder.component("entity", otherDisplayName));
 		},playerArg);
 
 	}
 
 	private void sendNoPermission(CommandSender sender) {
-		sender.sendMessage(MiniMessage.miniMessage().deserialize(
-				basics.getTranslator().translate("command.fail.permission",sender)
-		));
+		BasicsUtils.sendTranslate(basics,sender,"command.fail.permission");
 	}
 
 	private void sendNotFound(CommandSender sender, String target) {
-		sender.sendMessage(MiniMessage.miniMessage().deserialize(
-				basics.getTranslator().translate("command.fail.notfound.player",sender)
-				,Placeholder.unparsed("target",target)
-		));
+		BasicsUtils.sendTranslate(basics,sender,"command.fail.notfound.entity",
+				Placeholder.unparsed("target",target));
 	}
 
 }

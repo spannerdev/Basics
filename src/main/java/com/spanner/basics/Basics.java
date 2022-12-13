@@ -9,19 +9,19 @@ import com.spanner.basics.lang.Translator;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.extensions.Extension;
 import net.minestom.server.permission.Permission;
 import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 import org.slf4j.Logger;
 
 import java.util.Locale;
 
 public class Basics extends Extension {
-	final static String VERSION = "0.8.0";
+	final static String VERSION = "0.8.1";
 
 	Logger logger;
 	Translator translator;
@@ -29,7 +29,7 @@ public class Basics extends Extension {
 
 	Locale[] supportedLangs = { Locale.UK, Locale.FRANCE };
 
-	EventNode permissionHandlerEventNode;
+	EventNode<Event> permissionHandlerEventNode;
 
 	private void givePlayerGroupPerms(Player p, String group) {
 		JSONArray perms = config.get("permission.group."+group+".permissions");
@@ -60,7 +60,7 @@ public class Basics extends Extension {
 				Player p = event.getPlayer();
 				String uuid = p.getUuid().toString();
 				String group = config.get("permission.user."+uuid+".group");
-				Integer permissionLevel = (Integer)config.get("permission.user."+uuid+".permission_level");
+				Integer permissionLevel = config.get("permission.user."+uuid+".permission_level");
 				if (permissionLevel != null) p.setPermissionLevel(permissionLevel);
 				if (group == null) group = "default";
 				givePlayerGroupPerms(p,group);

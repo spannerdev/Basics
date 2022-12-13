@@ -23,13 +23,9 @@ public class GiveCommand extends Command {
 
 		setDefaultExecutor((sender,context) -> {
 			if (sender.hasPermission("basics.give")) {
-				sender.sendMessage(MiniMessage.miniMessage().deserialize(
-						basics.getTranslator().translate("command.give.usage",sender)
-				));
+				BasicsUtils.sendTranslate(basics,sender,"command.give.usage");
 			} else {
-				sender.sendMessage(MiniMessage.miniMessage().deserialize(
-						basics.getTranslator().translate("command.fail.permission",sender)
-				));
+				BasicsUtils.sendTranslate(basics,sender,"command.fail.permission");
 			}
 		});
 
@@ -38,80 +34,74 @@ public class GiveCommand extends Command {
 		var targetArg = ArgumentType.Entity("target").onlyPlayers(true);
 
 		addSyntax((sender, context) -> {
-			ItemStack b = context.get(itemStackArg);
-			if (sender instanceof Player) {
-				if (sender.hasPermission("basics.give.self")) {
-					give((Player) sender, b);
-					sender.sendMessage(MiniMessage.miniMessage().deserialize(
-						basics.getTranslator().translate("command.give.self", sender)
-						, Placeholder.unparsed("quantity", "1")
-						, Placeholder.unparsed("item", b.material().toString())
-					));
-				} else {
-					sender.sendMessage(MiniMessage.miniMessage().deserialize(
-						basics.getTranslator().translate("command.fail.permission",sender)
-					));
-				}
-			} else {
-				sender.sendMessage(MiniMessage.miniMessage().deserialize(
-					basics.getTranslator().translate("command.fail.constraint.player",sender)
-				));
+			if (!(sender instanceof Player p)) {
+				BasicsUtils.sendTranslate(basics,sender,"command.fail.constraint.player");
+				return;
 			}
+			if (!sender.hasPermission("basics.give.self")) {
+				BasicsUtils.sendTranslate(basics,sender,"command.fail.permission");
+				return;
+			}
+
+			ItemStack b = context.get(itemStackArg);
+
+			give(p, b);
+			giveSelfMessage(p, b);
 		},itemStackArg);
 
 		addSyntax((sender, context) -> {
-			ItemStack b = context.get(itemStackArg);
-			int quantity = context.get(quantityArg);
-			if (sender instanceof Player) {
-				if (sender.hasPermission("basics.give.self")) {
-					give((Player) sender, b.withAmount(quantity));
-					sender.sendMessage(MiniMessage.miniMessage().deserialize(
-							basics.getTranslator().translate("command.give.self", sender)
-							, Placeholder.unparsed("quantity", "" + quantity)
-							, Placeholder.unparsed("item", b.material().toString())
-					));
-				} else {
-					sender.sendMessage(MiniMessage.miniMessage().deserialize(
-						basics.getTranslator().translate("command.fail.permission",sender)
-					));
-				}
-			} else {
-				sender.sendMessage(MiniMessage.miniMessage().deserialize(
-					basics.getTranslator().translate("command.fail.constraint.player",sender)
-				));
+			if (!(sender instanceof Player p)) {
+				BasicsUtils.sendTranslate(basics,sender,"command.fail.constraint.player");
+				return;
 			}
+			if (!sender.hasPermission("basics.give.self")) {
+				BasicsUtils.sendTranslate(basics,sender,"command.fail.permission");
+				return;
+			}
+
+			int quantity = context.get(quantityArg);
+			ItemStack b = context.get(itemStackArg).withAmount(quantity);
+
+			give(p, b);
+			giveSelfMessage(p, b);
 		},itemStackArg,quantityArg);
 
 		addSyntax((sender,context)->{
+			if (!sender.hasPermission("basics.give.others")) {
+				BasicsUtils.sendTranslate(basics,sender,"command.fail.permission");
+				return;
+			}
+
 			ItemStack b = context.get(itemStackArg);
 			int quantity = context.get(quantityArg);
 			EntityFinder e = context.get(targetArg);
 			List<Entity> targets = e.find(sender);
-			if (sender.hasPermission("basics.give.others")) {
-				if (targets != null && targets.size() > 0) {
-					for (Entity entity : targets) {
-						Player target = (Player) entity;
-						give(target, b.withAmount(quantity));
-						Component targetDisplayName = BasicsUtils.getName(target);
-						sender.sendMessage(MiniMessage.miniMessage().deserialize(
-								basics.getTranslator().translate("command.give.other", sender)
-								, Placeholder.unparsed("quantity", "" + quantity)
-								, Placeholder.unparsed("item", b.material().toString())
-								, Placeholder.component("target", targetDisplayName)
-						));
-					}
-				} else {
-					sender.sendMessage(MiniMessage.miniMessage().deserialize(
-						basics.getTranslator().translate("command.fail.notfound.player",sender)
-						, Placeholder.unparsed("target", context.getRaw("target"))));
-				}
-			} else {
-				sender.sendMessage(MiniMessage.miniMessage().deserialize(
-						basics.getTranslator().translate("command.fail.permission",sender)
-				));
+
+			if (targets.size() == 0) {
+				BasicsUtils.sendTranslate(basics,sender,"command.fail.notfound.player",
+					Placeholder.unparsed("target", context.getRaw("target")));
+			}
+
+			for (Entity entity : targets) {
+				Player target = (Player) entity;
+				give(target, b.withAmount(quantity));
+				Component targetDisplayName = BasicsUtils.getName(target);
+				
+				BasicsUtils.sendTranslate(basics,sender,"command.give.other",
+						Placeholder.unparsed("quantity", ""+quantity),
+						Placeholder.unparsed("item", b.material().toString()),
+						Placeholder.component("target", targetDisplayName)
+				);
 			}
 		},itemStackArg,quantityArg,targetArg);
 
+	}
+
+	private void giveSelfMessage(Player sender, ItemStack b) {
+		BasicsUtils.sendTranslate(basics,sender,"command.give.self",
+			Placeholder.unparsed("quantity", "" + b.amount()),
+			Placeholder.unparsed("item", b.material().toString())
+		);
 	}
 
 	private void give(Player p, ItemStack stack) {
